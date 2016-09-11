@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Slider Crank</title>
+	<style>
+		* {
+			padding: 0;
+			margin: 0;
+		}
+
+
+		body {
+			margin: 0;
+			padding: 0;
+			height: 100vh;
+			width: 100vw;
+			overflow: hidden;
+			background: whitesmoke;
+		}
+
+	</style>
+
+</head>
+<body>
+<canvas id="myCanvas" height="100%" width="100%" ></canvas>
+
+</body>
+
+<script>
+
+	window.requestAnimFrame = (function (callback) {
+		return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+				function (callback) {
+					window.setTimeout(callback, 1000 / 60);
+				};
+	})();
+
+	var pi = 3.1415;
+
+	function draw(slider_crank, context) {
+
+		context.canvas.width  = window.innerWidth;
+		context.canvas.height = window.innerHeight;
+
+		/*context.beginPath();
+		context.arc(slider_crank.ox, slider_crank.oy , slider_crank.b*1.1,0,2*Math.PI);
+		context.fillStyle = "floralwhite";
+		context.fill();*/
+
+		context.beginPath();
+		context.moveTo(slider_crank.ox, slider_crank.oy);
+		var ax = slider_crank.b * Math.cos(slider_crank.theta);
+		var ay = slider_crank.b * Math.sin(slider_crank.theta);
+
+
+		var bx = ax + Math.sqrt(Math.abs(slider_crank.a*slider_crank.a - ay*ay));
+		context.lineTo(slider_crank.ox + ax, slider_crank.oy + ay);
+		context.moveTo(slider_crank.ox + ax, slider_crank.oy + ay);
+		context.lineTo(slider_crank.ox + bx, slider_crank.oy);
+
+		context.closePath();
+		context.stroke();
+
+		context.beginPath();
+		context.arc(slider_crank.ox + ax, slider_crank.oy + ay,2,0,2*Math.PI);
+		context.fill();
+		context.stroke();
+
+
+
+	}
+
+	function animate(slider_crank, canvas, context, startTime) {
+		// update
+		var time = (new Date()).getTime() - startTime;
+
+		var speed = 1;
+
+		var newTheta = speed * time / 1000;
+
+		slider_crank.theta = newTheta%(2*Math.PI);
+
+		// clear
+		context.clearRect(0, 0, canvas.width, canvas.height);
+
+		draw(slider_crank, context);
+
+		// request new frame
+		requestAnimFrame(function () {
+			animate(slider_crank, canvas, context, startTime);
+		});
+	}
+	var canvas = document.getElementById('myCanvas');
+	var context = canvas.getContext('2d');
+
+	var slider_crank = {
+		ox: window.innerWidth/3,
+		oy: window.innerHeight/2,
+		a: 200,
+		b: 100,
+		theta: 0
+	};
+
+	draw(slider_crank, context);
+
+	// wait one second before starting animation
+	setTimeout(function () {
+		var startTime = (new Date()).getTime();
+		animate(slider_crank, canvas, context, startTime);
+	}, 1000);
+</script>
+</html>
